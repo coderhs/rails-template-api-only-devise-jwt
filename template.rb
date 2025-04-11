@@ -46,13 +46,13 @@ RUBY
 
 create_file "app/controllers/users/sessions_controller.rb", sessions_controller
 
-confidential_controller = <<~RUBY
+confidential_controller = '
 class ConfidentialController < ApplicationController
   def secret
     render json: { message: "#{current_user.email}: I am not a fan of Hotwire!" }
   end
 end
-RUBY
+'
 
 create_file "app/controllers/confidential_controller.rb", confidential_controller
 
