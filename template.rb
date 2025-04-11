@@ -10,7 +10,7 @@ rails_command("generate devise:install")
 rails_command("generate devise User")
 rails_command("db:migrate")
 
-create_file "app/controllers/users/registrations_controller.rb", <<~RUBY
+registrations_controller = <<~RUBY
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
 
@@ -26,7 +26,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
 end
 RUBY
 
-create_file "app/controllers/users/sessions_controller.rb", <<~RUBY
+create_file "app/controllers/users/registrations_controller.rb", registrations_controller
+
+sessions_controller = <<~RUBY
 class Users::SessionsController < Devise::SessionsController
   respond_to :json
 
@@ -42,16 +44,22 @@ class Users::SessionsController < Devise::SessionsController
 end
 RUBY
 
-create_file "app/controllers/confidential_controller.rb", '
+create_file "app/controllers/users/sessions_controller.rb", sessions_controller
+
+confidential_controller = <<~RUBY
 class ConfidentialController < ApplicationController
   def secret
     render json: { message: "#{current_user.email}: I am not a fan of Hotwire!" }
   end
 end
-'
+RUBY
+
+create_file "app/controllers/confidential_controller.rb", confidential_controller
+
 
 remove_file "app/models/user.rb"
-create_file "app/models/user.rb", <<~RUBY
+
+user_model = <<~RUBY
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -66,6 +74,7 @@ class User < ApplicationRecord
          jwt_revocation_strategy: Devise::JWT::RevocationStrategies::Null
 end
 RUBY
+create_file "app/models/user.rb",
 
 environment %(config.session_store :disabled)
 
