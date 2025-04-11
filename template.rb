@@ -74,7 +74,7 @@ class User < ApplicationRecord
          jwt_revocation_strategy: Devise::JWT::RevocationStrategies::Null
 end
 RUBY
-create_file "app/models/user.rb",
+create_file "app/models/user.rb", user_model
 
 environment %(config.session_store :disabled)
 
