@@ -102,6 +102,73 @@ gsub_file "config/routes.rb", "devise_for :users", <<~RUBY
   get "/secret", to: "confidential#secret", defaults: { format: :json }
 RUBY
 
+gem "rack-cors"
+
+remove_file "config/initializers/cors.rb"
+
+CORS_FILE = <<~RUBY
+# Be sure to restart your server when you modify this file.
+
+# Avoid CORS issues when API is called from the frontend app.
+# Handle Cross-Origin Resource Sharing (CORS) in order to accept cross-origin Ajax requests.
+
+# Read more: https://github.com/cyu/rack-cors
+
+# Rails.application.config.middleware.insert_before 0, Rack::Cors do
+#   allow do
+#     origins "example.com"
+#
+#     resource "*",
+#       headers: :any,
+#       methods: [:get, :post, :put, :patch, :delete, :options, :head]
+#   end
+# end
+
+if Rails.env.production?
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins [ENV['FRONTEND_URL'], ENV['BACKEND_URL']]
+
+      resource '*',
+        headers: :any,
+        expose: ['Authorization'],
+        methods: [:get, :post, :put, :patch, :delete, :options, :head],
+        credentials: false
+    end
+  end
+else
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins '*'
+
+      resource '*',
+        headers: :any,
+        expose: ['Authorization'],
+        methods: [:get, :post, :put, :patch, :delete, :options, :head],
+        credentials: false
+    end
+  end
+end
+RUBY
+
+create_file  "config/initializers/cors.rb", CORS_FILE
+
+gsub_file "config/initializers/cors.rb", "devise_for :users", <<~RUBY
+  devise_for :users,
+    path: "",
+    path_names: {
+      sign_in: "login",
+      sign_out: "logout",
+      registration: "signup"
+    },
+    controllers: {
+      sessions: "users/sessions",
+      registrations: "users/registrations"
+    }, defaults: { format: :json }
+
+  get "/secret", to: "confidential#secret", defaults: { format: :json }
+RUBY
+
 after_bundle do
   master_key_path = "config/master.key"
 
@@ -177,3 +244,4 @@ after_bundle do
     end
   RUBY
 end
+
