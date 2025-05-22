@@ -167,7 +167,7 @@ after_bundle do
       jwt.revocation_requests = [
         [ "DELETE", %r{^/logout$} ]
       ]
-      jwt.expiration_time = 15.minutes.to_i
+      jwt.expiration_time = 2.days.to_i
     end
 
     config.navigational_formats = []
